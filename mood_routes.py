@@ -7,9 +7,11 @@ from models import MoodEntry, User, TrackLog
 from spotify_helpers import AutoCreatePlaylistIfEnabled, EnsureFreshAccessToken
 from security import verify_session_jwt
 from datetime import datetime, timedelta, timezone
-from deepface import DeepFace
 
 import tempfile, shutil, os, random, requests
+os.environ["DEEPFACE_BACKEND"] = "opencv"
+
+from deepface import DeepFace
 
 # ---------------------------------------------------------------------
 # -- Mood Routes
