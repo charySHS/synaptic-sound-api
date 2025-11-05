@@ -12,8 +12,8 @@ if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set")
 
 connect_args = {}
-if DATABASE_URL.startswith("postgres://") or DATABASE_URL.startswith("postgresql://"):
-    connect_args = {"sslmode": "require"}
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True, connect_args=connect_args)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)

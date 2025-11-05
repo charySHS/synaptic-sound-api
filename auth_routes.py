@@ -5,6 +5,7 @@ from database import get_db
 from models import User
 from spotify_helpers import GetOrCreateUser
 from security import issue_session_jwt, verify_session_jwt, encrypt_token
+from typing import Literal
 
 import os, datetime, requests
 
@@ -22,6 +23,12 @@ COOKIE_NAME = "ss_session"
 COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN", "synaptic-sound.com")
 COOKIE_SECURE = True
 COOKIE_SAMESITE = "lax"
+
+VALID_SAMESITE: dict[str, Literal["lax", "strict", "none"]] = {
+    "lax": "lax",
+    "strict": "strict",
+    "none": "none",
+}
 
 @router.get("/login")
 def login():
@@ -63,9 +70,12 @@ def callback(code: str, response: Response, db: Session = Depends(get_db)):
     db.commit(); db.refresh(user)
 
     jwt_cookie = issue_session_jwt(user.spotify_id)
+
+    samesite_value = VALID_SAMESITE.get(str(COOKIE_SAMESITE).lower(), "lax")
+
     response.set_cookie(
         key=COOKIE_NAME, value=jwt_cookie, httponly=True, secure=COOKIE_SECURE,
-        samesite=COOKIE_SAMESITE, domain=COOKIE_DOMAIN, max_age=60*60*24*30
+        samesite=samesite_value, domain=COOKIE_DOMAIN, max_age=60*60*24*30
     )
 
     return {"ok": True, "display_name": user.display_name}

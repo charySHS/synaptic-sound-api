@@ -45,7 +45,7 @@ def mood_from_emoji(request: Request, emoji: str = Form(...), db: Session = Depe
     return {"detected_mood": detected, "entry_id": entry.id, "playlist_url": playlist_url}
 
 @router.post("/selfie")
-def mood_from_selfie(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db())):
+def mood_from_selfie(request: Request, file: UploadFile = File(...), db: Session = Depends(get_db)):
     user = _require_user(request, db)
 
     # TODO: Utilize DeepFace later

@@ -16,6 +16,7 @@ app = FastAPI(title="Synaptic Sound Backend", version="1.0.0")
 ALLOWED_ORIGINS = [
     "https://synaptic-sound.com",
     "https://www.synaptic-sound.com",
+    "https://synaptic-sound-api.onrender.com"
 ]
 
 # CORS setup
@@ -27,6 +28,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Routers
+app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+app.include_router(mood_router, prefix="/mood", tags=["Mood"])
+app.include_router(spotify_router, prefix="/spotify", tags=["Spotify"])
+
 @app.get("/")
 def root():
     return {"ok": True, "service": "Synaptic Sound API"}
@@ -35,7 +41,3 @@ def root():
 def health():
     return {"status": "healthy"}
 
-# Routers
-app.include_router(auth_router, prefix="/auth", tags=["Auth"])
-app.include_router(mood_router, prefix="/mood", tags=["Mood"])
-app.include_router(spotify_router, prefix="/spotify", tags=["Spotify"])
