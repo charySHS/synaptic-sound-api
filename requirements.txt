@@ -7,8 +7,9 @@ cryptography
 PyJWT
 python-dotenv
 python-multipart
-deepface
-opencv-python-headless
+deepface==0.0.93
+opencv-python-headless==4.10.0.84
 numpy
 pandas
-tensorflow
+tensorflow==2.15.0
+tf-keras==2.15.0
