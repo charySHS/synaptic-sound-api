@@ -7,3 +7,8 @@ cryptography
 PyJWT
 python-dotenv
 python-multipart
+deepface
+opencv-python-headless
+numpy
+pandas
+tensorflow

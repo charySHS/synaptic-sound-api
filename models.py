@@ -25,6 +25,7 @@ class User(Base):
 
     moods = relationship("MoodEntry", back_populates="user", cascade="all,delete")
     playlists = relationship("Playlist", back_populates="user", cascade="all,delete")
+    tracks = relationship("TrackLog", back_populates="user", cascade="all,delete")
 
 class MoodEntry(Base):
     __tablename__ = "mood_entries"
@@ -39,6 +40,7 @@ class MoodEntry(Base):
 
     user = relationship("User", back_populates="moods")
     playlist = relationship("Playlist", back_populates="moods", uselist=False)
+    track = relationship("TrackLog", back_populates="mood", uselist=False)
 
 class Playlist(Base):
     __tablename__ = "playlists"
@@ -53,3 +55,21 @@ class Playlist(Base):
 
     user = relationship("User", back_populates="playlists")
     mood = relationship("MoodEntry", back_populates="playlists")
+
+class TrackLog(Base):
+    __tablename__ = "track_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    mood_id = Column(Integer, ForeignKey("mood_entries.id", ondelete="SET NULL"))
+
+    track_id = Column(String, nullable=False)
+    track_name = Column(String, nullable=False)
+    artist_name = Column(String)
+    album_name = Column(String)
+    album_image = Column(String)
+    spotify_url = Column(String)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User", back_populates="tracks")
+    mood = relationship("MoodEntry", back_populates="track")
