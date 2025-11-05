@@ -1,10 +1,12 @@
 # Imports
 from fastapi import APIRouter, UploadFile, File, Form, Depends, Request, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from database import get_db
 from models import MoodEntry, User
 from spotify_helpers import AutoCreatePlaylistIfEnabled, EnsureFreshAccessToken
 from security import verify_session_jwt
+from datetime import datetime, timedelta, timezone
 
 import random
 
@@ -56,3 +58,62 @@ def mood_from_selfie(request: Request, file: UploadFile = File(...), db: Session
     playlist_url = AutoCreatePlaylistIfEnabled(user, detected, db)
 
     return {"detected_mood": detected, "entry_id": entry.id, "playlist_url": playlist_url}
+
+@router.get("/history")
+def get_mood_history(request: Request, days: int | None = None, db: Session = Depends(get_db)):
+    user = _require_user(request, db)
+    query = db.query(MoodEntry).filter_by(user_id=user.id).order_by(MoodEntry.created_at.desc())
+
+    if days:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        query = query.filter(MoodEntry.created_at >= cutoff)
+
+    moods = query.all()
+
+    return [
+        {
+            "id": m.id,
+            "emoji": m.emoji,
+            "detected_mood": m.detected_mood,
+            "confidence": m.confidence,
+            "created_at": m.created_at.isoformat(),
+        }
+        for m in moods
+    ]
+
+@router.get("/stats")
+def get_mood_stats(request: Request, db: Session = Depends(get_db)):
+    user = _require_user(request, db)
+
+    results = (
+        db.query(MoodEntry.detected_mood, func.count(MoodEntry.id))
+        .filter_by(user_id=user.id)
+        .group_by(MoodEntry.detected_mood)
+        .all()
+    )
+
+    total = sum(count for _, count in results)
+    stats = [
+        {"mood": mood, "count": count, "percent": round((count / total)* 100, 1)}
+        for mood, count in results
+    ]
+
+    return {"total_entries": total, "stats": stats}
+
+@router.get("/trends")
+def get_mood_trends(request: Request, db: Session = Depends(get_db)):
+    user = _require_user(request, db)
+
+    results = (
+        db.query(func.date(MoodEntry.created_at).label("date"), MoodEntry.detected_mood, func.count(MoodEntry.id).label("count"))
+        .filter_by(user_id=user.id)
+        .group_by("date", MoodEntry.detected_mood)
+        .order_by("date")
+        .all()
+    )
+
+    grouped = {}
+    for date, mood, count in results:
+        grouped.setdefault(str(date), {})[mood] = count
+
+    return grouped
