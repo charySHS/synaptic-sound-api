@@ -6,3 +6,4 @@ requests
 cryptography
 PyJWT
 python-dotenv
+python-multipart
