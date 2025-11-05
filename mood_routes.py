@@ -8,9 +8,8 @@ from spotify_helpers import AutoCreatePlaylistIfEnabled, EnsureFreshAccessToken
 from security import verify_session_jwt
 from datetime import datetime, timedelta, timezone
 from deepface import DeepFace
-from deepface.commons import functions
 
-import tempfile, shutil, os, random
+import tempfile, shutil, os, random, requests
 
 # ---------------------------------------------------------------------
 # -- Mood Routes
@@ -75,10 +74,10 @@ def mood_from_selfie(request: Request, file: UploadFile = File(...), db: Session
         shutil.copyfileobj(file.file, f, length=1024 * 1024)
 
     try:
-        analysis = DeepFace.analyze(img_path=temp_path, actions=["emotion"], enforce_detection=False)
+        analysis = DeepFace.analyze(img_path=temp_path, actions=["emotion"], detector_backend="opencv", enforce_detection=False)
         detected = analysis[0]["dominant_emotion"]
         confidence = float(analysis[0]["emotion"].get(detected, 0))
-    except (ValueError, functions.DetectorError) as e:
+    except Exception as e:
         print(f"DeepFace analysis failed:  {e}")
         detected = random.choice(MOODS)
         confidence = None
