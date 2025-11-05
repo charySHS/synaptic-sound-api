@@ -1,0 +1,35 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.Python
+env/
+venv/
+ENV/
+.venv/
+build/
+dist/
+
+# --- IDEs ---
+.idea/
+.vscode/
+*.iml
+
+# --- Environment ---
+.env
+*.env
+!.env.example
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+*.tmp
+
+# --- Render Build Cache ---
+.render/
