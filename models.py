@@ -39,7 +39,7 @@ class MoodEntry(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="moods")
-    playlist = relationship("Playlist", back_populates="moods", uselist=False)
+    playlist = relationship("Playlist", back_populates="mood", uselist=False)
     track = relationship("TrackLog", back_populates="mood", uselist=False)
 
 class Playlist(Base):
@@ -54,7 +54,7 @@ class Playlist(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="playlists")
-    mood = relationship("MoodEntry", back_populates="playlists")
+    mood = relationship("MoodEntry", back_populates="playlist")
 
 class TrackLog(Base):
     __tablename__ = "track_logs"
